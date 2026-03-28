@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Store, Info } from 'lucide-react';
+import { ShoppingCart, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MarketplacePricesProps {
@@ -14,48 +14,78 @@ interface MarketplacePricesProps {
 const MarketplacePrices = ({ targetPricePerUnit, currency }: MarketplacePricesProps) => {
   const format = (val: number) => val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  // Formula: Price = (Target + FixedFee) / (1 - Commission)
+  // Função de cálculo iterativo para convergir no preço correto considerando taxas dinâmicas
+  const calculatePrice = (target: number, commission: number, getFixedFee: (p: number) => number) => {
+    let price = target / (1 - commission); // Estimativa inicial
+    
+    // Máximo de 10 iterações para convergência (< R$ 0,01)
+    for (let i = 0; i < 10; i++) {
+      const fee = getFixedFee(price);
+      
+      // Caso especial: Taxa fixa de 50% do preço (Shopee < 8 e ML < 12.50)
+      // Se a taxa for 50% do preço, a fórmula muda: Price = (Target) / (1 - commission - 0.5)
+      let newPrice;
+      if (fee === price * 0.5) {
+        newPrice = target / (1 - commission - 0.5);
+      } else {
+        newPrice = (target + fee) / (1 - commission);
+      }
+
+      if (Math.abs(newPrice - price) < 0.01) return newPrice;
+      price = newPrice;
+    }
+    return price;
+  };
+
   const platforms = [
     {
       name: 'TikTok Shop',
-      commission: 0.06,
-      fixedFee: 4 + 1.06,
-      description: '6% comissão + R$4 fixo + R$1,06 SFP',
+      calculate: (target: number) => calculatePrice(target, 0.06, () => 4.00),
+      description: '6% comissão + R$ 4,00 fixo',
       color: 'border-black dark:border-white'
     },
     {
-      name: 'Shopee (CPF)',
-      commission: 0.14,
-      fixedFee: 7,
-      description: '14% comissão + R$7 fixo',
+      name: 'Shopee',
+      calculate: (target: number) => calculatePrice(target, 0.14, (p) => {
+        if (p < 8) return p * 0.5;
+        if (p < 80) return 4.00;
+        if (p < 100) return 16.00;
+        if (p < 200) return 20.00;
+        return 26.00;
+      }),
+      description: '14% comissão + Taxa fixa por faixa',
       color: 'border-orange-500'
     },
     {
-      name: 'Shopee (CNPJ)',
-      commission: 0.14,
-      fixedFee: 4,
-      description: '14% comissão + R$4 fixo',
-      color: 'border-orange-600'
-    },
-    {
       name: 'Amazon (Indiv.)',
-      commission: 0.15,
-      fixedFee: 2,
-      description: '15% comissão + R$2 fixo',
+      calculate: (target: number) => calculatePrice(target, 0.13, () => 2.00),
+      description: '13% comissão + R$ 2,00 fixo',
       color: 'border-yellow-500'
     },
     {
+      name: 'Amazon (Prof.)',
+      calculate: (target: number) => calculatePrice(target, 0.13, () => 0.00),
+      description: '13% comissão + R$ 0,00 fixo',
+      color: 'border-yellow-600'
+    },
+    {
       name: 'ML Clássico',
-      commission: 0.14,
-      fixedFee: 6.75,
-      description: '14% comissão + R$6,75 fixo (< R$79)',
+      calculate: (target: number) => calculatePrice(target, 0.12, (p) => {
+        if (p < 12.50) return p * 0.5;
+        if (p < 80) return 6.75;
+        return 0.00;
+      }),
+      description: '12% comissão + Taxa fixa por faixa',
       color: 'border-blue-400'
     },
     {
       name: 'ML Premium',
-      commission: 0.19,
-      fixedFee: 6.75,
-      description: '19% comissão + R$6,75 fixo (< R$79)',
+      calculate: (target: number) => calculatePrice(target, 0.16, (p) => {
+        if (p < 12.50) return p * 0.5;
+        if (p < 80) return 6.75;
+        return 0.00;
+      }),
+      description: '16% comissão + Taxa fixa por faixa',
       color: 'border-blue-600'
     }
   ];
@@ -73,7 +103,7 @@ const MarketplacePrices = ({ targetPricePerUnit, currency }: MarketplacePricesPr
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {platforms.map((p) => {
-            const finalPrice = (targetPricePerUnit + p.fixedFee) / (1 - p.commission);
+            const finalPrice = p.calculate(targetPricePerUnit);
             return (
               <div 
                 key={p.name} 
@@ -98,7 +128,7 @@ const MarketplacePrices = ({ targetPricePerUnit, currency }: MarketplacePricesPr
                   </p>
                 </div>
                 <Badge variant="outline" className="text-[10px] opacity-70">
-                  {(p.commission * 100).toFixed(0)}% + {currency}{p.fixedFee.toFixed(2)}
+                  Info
                 </Badge>
               </div>
             );
