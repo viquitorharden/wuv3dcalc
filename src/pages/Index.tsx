@@ -58,17 +58,18 @@ const Index = () => {
     const totalHours = jobHours + (jobMinutes / 60);
     const safeQuantity = quantity > 0 ? quantity : 1;
     
-    // 1. Filament Cost (Total for the batch)
+    // 1. Filament Cost (Weight per piece * quantity)
     const costPerGram = selectedFilament 
       ? selectedFilament.price / selectedFilament.weightGrams 
       : 0.09; 
-    const filamentCost = jobGrams * costPerGram;
+    const totalGrams = jobGrams * safeQuantity;
+    const filamentCost = totalGrams * costPerGram;
 
-    // 2. Electricity Cost (Total for the batch)
+    // 2. Electricity Cost (Total machine time for the batch)
     const watts = selectedPrinter?.powerWatts || 150;
     const electricityCost = (watts / 1000) * totalHours * electricityRate;
 
-    // 3. Printer Wear (Total for the batch)
+    // 3. Printer Wear (Total machine time for the batch)
     const wearPerHour = selectedPrinter 
       ? (selectedPrinter.price / selectedPrinter.lifespanHours) + selectedPrinter.maintenancePerHour
       : 0.80; 
@@ -166,7 +167,7 @@ const Index = () => {
                     type="number" 
                     step="0.01" 
                     value={electricityRate} 
-                    onChange={e => setElectricityRate(Number(e.target.value))}
+                    onChange={setElectricityRate(Number(e.target.value))}
                   />
                 </div>
                 <div className="space-y-2">
@@ -191,7 +192,7 @@ const Index = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="font-bold">Peso Total (g)</Label>
+                    <Label className="font-bold">Peso por Peça (g)</Label>
                     <Input 
                       type="number" 
                       value={jobGrams} 
@@ -282,7 +283,7 @@ const Index = () => {
             
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
               <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                <strong>Nota:</strong> Itens extras e tempo de pós-processamento são considerados <strong>por unidade</strong> e multiplicados pela quantidade de peças na mesa.
+                <strong>Nota:</strong> O peso, itens extras e tempo de pós-processamento são considerados <strong>por unidade</strong>. O tempo de impressão deve ser o <strong>total</strong> do lote.
               </p>
             </div>
           </div>
