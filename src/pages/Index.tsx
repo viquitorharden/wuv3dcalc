@@ -19,7 +19,7 @@ import {
   TrendingUp,
   ChevronDown,
   ChevronUp,
-  Package
+  Layers
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,6 +45,7 @@ const Index = () => {
   const [jobGrams, setJobGrams] = useState(50);
   const [jobHours, setJobHours] = useState(2);
   const [jobMinutes, setJobMinutes] = useState(30);
+  const [quantity, setQuantity] = useState(1);
   const [failureRate, setFailureRate] = useState(10);
   const [postMinutes, setPostMinutes] = useState(15);
   const [profitMargin, setProfitMargin] = useState(50);
@@ -94,11 +95,12 @@ const Index = () => {
       extrasCost,
       subtotal,
       suggestedPrice,
-      costPerGram
+      costPerGram,
+      quantity: quantity > 0 ? quantity : 1
     };
   }, [
     jobGrams, jobHours, jobMinutes, failureRate, postMinutes, profitMargin,
-    selectedPrinter, selectedFilament, electricityRate, labourRate, extras
+    selectedPrinter, selectedFilament, electricityRate, labourRate, extras, quantity
   ]);
 
   return (
@@ -188,18 +190,32 @@ const Index = () => {
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="font-bold">Peso do Filamento (g)</Label>
-                  <Input 
-                    type="number" 
-                    value={jobGrams} 
-                    onChange={e => setJobGrams(Number(e.target.value))}
-                    className="text-lg"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="font-bold">Peso Total (g)</Label>
+                    <Input 
+                      type="number" 
+                      value={jobGrams} 
+                      onChange={e => setJobGrams(Number(e.target.value))}
+                      className="text-lg"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                      <Layers className="h-4 w-4" /> Peças na Mesa
+                    </Label>
+                    <Input 
+                      type="number" 
+                      min="1"
+                      value={quantity} 
+                      onChange={e => setQuantity(Number(e.target.value))}
+                      className="text-lg border-blue-200 focus-visible:ring-blue-500"
+                    />
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label className="font-bold flex items-center gap-2"><Clock className="h-4 w-4" /> Tempo de Impressão</Label>
+                  <Label className="font-bold flex items-center gap-2"><Clock className="h-4 w-4" /> Tempo Total de Impressão</Label>
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <Input 
@@ -267,7 +283,7 @@ const Index = () => {
             
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
               <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                <strong>Dica:</strong> Os cálculos são atualizados em tempo real. Certifique-se de selecionar a impressora e o filamento corretos nas configurações acima para maior precisão.
+                <strong>Dica:</strong> Insira o peso e tempo <strong>totais</strong> informados pelo seu fatiador. A calculadora dividirá os custos automaticamente pela quantidade de peças na mesa.
               </p>
             </div>
           </div>

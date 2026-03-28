@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 interface ResultsDisplayProps {
   results: {
@@ -15,6 +16,7 @@ interface ResultsDisplayProps {
     subtotal: number;
     suggestedPrice: number;
     costPerGram: number;
+    quantity: number;
   };
   currency: string;
 }
@@ -32,13 +34,21 @@ const ResultsDisplay = ({ results, currency }: ResultsDisplayProps) => {
   ];
 
   const total = results.subtotal || 1;
+  const isMultiple = results.quantity > 1;
 
   return (
-    <Card className="h-full border-2 border-primary/20 shadow-lg">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-bold text-center">Resumo de Custos</CardTitle>
+    <Card className="h-full border-2 border-primary/20 shadow-lg overflow-hidden">
+      <CardHeader className="pb-2 bg-muted/30">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl font-bold">Resumo de Custos</CardTitle>
+          {isMultiple && (
+            <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+              {results.quantity} peças
+            </Badge>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         <div className="space-y-3">
           {items.map((item) => (
             <div key={item.label} className="flex justify-between items-center text-sm">
@@ -63,16 +73,31 @@ const ResultsDisplay = ({ results, currency }: ResultsDisplayProps) => {
 
         <Separator />
 
+        {/* Total do Lote */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <p className="text-xs text-muted-foreground uppercase font-bold">Custo Total</p>
+            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Custo Total (Lote)</p>
             <p className="text-2xl font-black text-primary">{currency} {format(results.subtotal)}</p>
           </div>
           <div className="space-y-1 text-right">
-            <p className="text-xs text-muted-foreground uppercase font-bold">Preço Sugerido</p>
+            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Preço Sugerido (Lote)</p>
             <p className="text-2xl font-black text-green-600 dark:text-green-400">{currency} {format(results.suggestedPrice)}</p>
           </div>
         </div>
+
+        {/* Valor por Unidade (se houver mais de uma peça) */}
+        {isMultiple && (
+          <div className="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 dark:border-blue-900 grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <p className="text-[10px] text-blue-700 dark:text-blue-300 uppercase font-bold tracking-wider">Custo por Peça</p>
+              <p className="text-xl font-bold text-blue-900 dark:text-blue-100">{currency} {format(results.subtotal / results.quantity)}</p>
+            </div>
+            <div className="space-y-1 text-right">
+              <p className="text-[10px] text-blue-700 dark:text-blue-300 uppercase font-bold tracking-wider">Preço Sugerido / Peça</p>
+              <p className="text-xl font-bold text-blue-900 dark:text-blue-100">{currency} {format(results.suggestedPrice / results.quantity)}</p>
+            </div>
+          </div>
+        )}
 
         <div className="bg-muted/50 p-3 rounded-lg text-center">
           <p className="text-sm text-muted-foreground">
