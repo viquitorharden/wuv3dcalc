@@ -33,6 +33,10 @@ const ResultsDisplay = ({ results, currency }: ResultsDisplayProps) => {
     { label: 'Itens Extras', value: results.extrasCost, color: 'bg-orange-400' },
   ];
 
+  const productionCost = results.filamentCost + results.electricityCost + results.printerWear + results.failureSurcharge;
+  const costWithoutExtras = results.subtotal - results.extrasCost;
+  const costWithoutPost = results.subtotal - results.postProcessingCost;
+  
   const total = results.subtotal || 1;
   const isMultiple = results.quantity > 1;
 
@@ -73,15 +77,32 @@ const ResultsDisplay = ({ results, currency }: ResultsDisplayProps) => {
 
         <Separator />
 
-        {/* Total do Lote */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Custo Total (Lote)</p>
-            <p className="text-2xl font-black text-primary">{currency} {format(results.subtotal)}</p>
+        {/* Custo de Produção e Total */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Custo de Produção</p>
+              <p className="text-2xl font-black text-primary">{currency} {format(productionCost)}</p>
+            </div>
+            <div className="space-y-1 text-right">
+              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Preço Sugerido (Lote)</p>
+              <p className="text-2xl font-black text-green-600 dark:text-green-400">{currency} {format(results.suggestedPrice)}</p>
+            </div>
           </div>
-          <div className="space-y-1 text-right">
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Preço Sugerido (Lote)</p>
-            <p className="text-2xl font-black text-green-600 dark:text-green-400">{currency} {format(results.suggestedPrice)}</p>
+
+          <div className="bg-muted/30 p-3 rounded-lg space-y-1 border border-dashed">
+            <div className="flex justify-between items-center text-[11px]">
+              <span className="text-muted-foreground font-medium">Custo Total (com tudo):</span>
+              <span className="font-bold">{currency} {format(results.subtotal)}</span>
+            </div>
+            <div className="flex justify-between items-center text-[11px]">
+              <span className="text-muted-foreground">Sem itens extras:</span>
+              <span className="font-medium">{currency} {format(costWithoutExtras)}</span>
+            </div>
+            <div className="flex justify-between items-center text-[11px]">
+              <span className="text-muted-foreground">Sem pós-processamento:</span>
+              <span className="font-medium">{currency} {format(costWithoutPost)}</span>
+            </div>
           </div>
         </div>
 
