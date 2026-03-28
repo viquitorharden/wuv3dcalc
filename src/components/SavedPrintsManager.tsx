@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Trash2, Eye, Calendar, Package, Clock, Weight } from 'lucide-react';
+import { Trash2, Eye, Calendar, Package, Clock, Weight, ShoppingCart, Info } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface SavedPrint {
   id: string;
@@ -27,6 +28,10 @@ export interface SavedPrint {
   results: {
     subtotal: number;
     suggestedPrice: number;
+    marketplacePrices: {
+      name: string;
+      price: number;
+    }[];
   };
 }
 
@@ -89,7 +94,7 @@ const SavedPrintsManager = ({ prints, onDelete, currency }: SavedPrintsManagerPr
       )}
 
       <Dialog open={!!selectedPrint} onOpenChange={(open) => !open && setSelectedPrint(null)}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
           {selectedPrint && (
             <>
               <DialogHeader>
@@ -97,46 +102,49 @@ const SavedPrintsManager = ({ prints, onDelete, currency }: SavedPrintsManagerPr
                 <p className="text-sm text-muted-foreground">Salvo em {new Date(selectedPrint.date).toLocaleString()}</p>
               </DialogHeader>
               
-              <div className="grid grid-cols-2 gap-4 py-4">
-                <div className="bg-muted/50 p-4 rounded-xl space-y-1">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Peso Total</p>
-                  <div className="flex items-center gap-2">
-                    <Weight className="h-4 w-4 text-primary" />
-                    <span className="text-lg font-bold">{selectedPrint.inputs.jobGrams}g</span>
-                  </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-4">
+                <div className="bg-muted/50 p-3 rounded-xl space-y-1">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Peso</p>
+                  <span className="text-sm font-bold block">{selectedPrint.inputs.jobGrams}g</span>
                 </div>
-                <div className="bg-muted/50 p-4 rounded-xl space-y-1">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Tempo Total</p>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span className="text-lg font-bold">{selectedPrint.inputs.jobHours}h {selectedPrint.inputs.jobMinutes}m</span>
-                  </div>
+                <div className="bg-muted/50 p-3 rounded-xl space-y-1">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Tempo</p>
+                  <span className="text-sm font-bold block">{selectedPrint.inputs.jobHours}h {selectedPrint.inputs.jobMinutes}m</span>
                 </div>
-                <div className="bg-muted/50 p-4 rounded-xl space-y-1">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Quantidade</p>
-                  <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4 text-primary" />
-                    <span className="text-lg font-bold">{selectedPrint.inputs.quantity} un.</span>
-                  </div>
+                <div className="bg-muted/50 p-3 rounded-xl space-y-1">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Qtd.</p>
+                  <span className="text-sm font-bold block">{selectedPrint.inputs.quantity} un.</span>
                 </div>
-                <div className="bg-muted/50 p-4 rounded-xl space-y-1">
+                <div className="bg-muted/50 p-3 rounded-xl space-y-1">
                   <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Margem</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold">{selectedPrint.inputs.profitMargin}%</span>
-                  </div>
+                  <span className="text-sm font-bold block">{selectedPrint.inputs.profitMargin}%</span>
                 </div>
               </div>
 
-              <Separator />
-
-              <div className="space-y-4 pt-2">
-                <div className="flex justify-between items-center">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
                   <span className="text-muted-foreground">Custo de Produção:</span>
                   <span className="font-bold">{currency} {format(selectedPrint.results.subtotal)}</span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-950/30 rounded-xl border border-green-100 dark:border-green-900">
-                  <span className="font-bold text-green-800 dark:text-green-300">Preço Sugerido:</span>
-                  <span className="text-2xl font-black text-green-600 dark:text-green-400">{currency} {format(selectedPrint.results.suggestedPrice)}</span>
+                  <span className="font-bold text-green-800 dark:text-green-300">Preço Sugerido (Lote):</span>
+                  <span className="text-xl font-black text-green-600 dark:text-green-400">{currency} {format(selectedPrint.results.suggestedPrice)}</span>
+                </div>
+              </div>
+
+              <Separator className="my-4" />
+
+              <div className="space-y-4">
+                <h5 className="text-sm font-bold flex items-center gap-2">
+                  <ShoppingCart className="h-4 w-4" /> Preços por Marketplace (Unidade)
+                </h5>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {selectedPrint.results.marketplacePrices?.map((p) => (
+                    <div key={p.name} className="p-3 rounded-lg border bg-muted/20 flex justify-between items-center">
+                      <span className="text-xs font-medium">{p.name}</span>
+                      <span className="font-bold text-sm">{currency} {format(p.price)}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </>

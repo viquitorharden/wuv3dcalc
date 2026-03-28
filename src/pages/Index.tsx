@@ -108,6 +108,23 @@ const Index = () => {
   ]);
 
   const handleSavePrint = (name: string) => {
+    const targetPricePerUnit = results.suggestedPrice / results.quantity;
+    
+    // Marketplace calculation logic (synced with MarketplacePrices component)
+    const platforms = [
+      { name: 'TikTok Shop', commission: 0.06, fixedFee: 5.06 },
+      { name: 'Shopee (CPF)', commission: 0.14, fixedFee: 7 },
+      { name: 'Shopee (CNPJ)', commission: 0.14, fixedFee: 4 },
+      { name: 'Amazon (Indiv.)', commission: 0.15, fixedFee: 2 },
+      { name: 'ML Clássico', commission: 0.14, fixedFee: 6.75 },
+      { name: 'ML Premium', commission: 0.19, fixedFee: 6.75 }
+    ];
+
+    const marketplacePrices = platforms.map(p => ({
+      name: p.name,
+      price: (targetPricePerUnit + p.fixedFee) / (1 - p.commission)
+    }));
+
     const newPrint: SavedPrint = {
       id: crypto.randomUUID(),
       name,
@@ -122,7 +139,8 @@ const Index = () => {
       },
       results: {
         subtotal: results.subtotal,
-        suggestedPrice: results.suggestedPrice
+        suggestedPrice: results.suggestedPrice,
+        marketplacePrices
       }
     };
     setSavedPrints([newPrint, ...savedPrints]);
