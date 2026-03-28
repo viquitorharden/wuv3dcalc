@@ -58,12 +58,11 @@ const Index = () => {
     const totalHours = jobHours + (jobMinutes / 60);
     const safeQuantity = quantity > 0 ? quantity : 1;
     
-    // 1. Filament Cost (Weight per piece * quantity)
+    // 1. Filament Cost (Total weight of the batch)
     const costPerGram = selectedFilament 
       ? selectedFilament.price / selectedFilament.weightGrams 
       : 0.09; 
-    const totalGrams = jobGrams * safeQuantity;
-    const filamentCost = totalGrams * costPerGram;
+    const filamentCost = jobGrams * costPerGram;
 
     // 2. Electricity Cost (Total machine time for the batch)
     const watts = selectedPrinter?.powerWatts || 150;
@@ -192,7 +191,7 @@ const Index = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="font-bold">Peso por Peça (g)</Label>
+                    <Label className="font-bold">Peso Total do Lote (g)</Label>
                     <Input 
                       type="number" 
                       value={jobGrams} 
@@ -283,7 +282,7 @@ const Index = () => {
             
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
               <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                <strong>Nota:</strong> O peso, itens extras e tempo de pós-processamento são considerados <strong>por unidade</strong>. O tempo de impressão deve ser o <strong>total</strong> do lote.
+                <strong>Nota:</strong> O peso e o tempo de impressão devem ser o <strong>total do lote</strong>. Itens extras e tempo de pós-processamento são considerados <strong>por unidade</strong>.
               </p>
             </div>
           </div>
