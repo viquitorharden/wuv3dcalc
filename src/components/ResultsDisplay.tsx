@@ -11,6 +11,7 @@ interface ResultsDisplayProps {
     printerWear: number;
     failureSurcharge: number;
     postProcessingCost: number;
+    extrasCost: number;
     subtotal: number;
     suggestedPrice: number;
     costPerGram: number;
@@ -27,6 +28,7 @@ const ResultsDisplay = ({ results, currency }: ResultsDisplayProps) => {
     { label: 'Desgaste da Impressora', value: results.printerWear, color: 'bg-orange-500' },
     { label: 'Margem de Falha', value: results.failureSurcharge, color: 'bg-red-500' },
     { label: 'Pós-processamento', value: results.postProcessingCost, color: 'bg-green-500' },
+    { label: 'Itens Extras', value: results.extrasCost, color: 'bg-orange-400' },
   ];
 
   const total = results.subtotal || 1;

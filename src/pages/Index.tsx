@@ -6,6 +6,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import CurrencySelector from '@/components/CurrencySelector';
 import PrinterManager, { Printer } from '@/components/PrinterManager';
 import FilamentManager, { Filament } from '@/components/FilamentManager';
+import ExtraManager, { ExtraItem } from '@/components/ExtraManager';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { 
@@ -17,7 +18,8 @@ import {
   Hammer, 
   TrendingUp,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Package
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +32,7 @@ const Index = () => {
   const [currency, setCurrency] = useLocalStorage('calc_currency', 'R$');
   const [printers, setPrinters] = useLocalStorage<Printer[]>('calc_printers', []);
   const [filaments, setFilaments] = useLocalStorage<Filament[]>('calc_filaments', []);
+  const [extras, setExtras] = useLocalStorage<ExtraItem[]>('calc_extras', []);
   const [selectedPrinterId, setSelectedPrinterId] = useLocalStorage('calc_selected_printer', '');
   const [selectedFilamentId, setSelectedFilamentId] = useLocalStorage('calc_selected_filament', '');
   const [electricityRate, setElectricityRate] = useLocalStorage('calc_elec_rate', 0.85);
@@ -76,7 +79,10 @@ const Index = () => {
     // 5. Post-processing
     const postProcessingCost = (postMinutes / 60) * labourRate;
 
-    const subtotal = baseCost + failureSurcharge + postProcessingCost;
+    // 6. Extras
+    const extrasCost = extras.reduce((sum, item) => sum + item.price, 0);
+
+    const subtotal = baseCost + failureSurcharge + postProcessingCost + extrasCost;
     const suggestedPrice = subtotal * (1 + profitMargin / 100);
 
     return {
@@ -85,13 +91,14 @@ const Index = () => {
       printerWear,
       failureSurcharge,
       postProcessingCost,
+      extrasCost,
       subtotal,
       suggestedPrice,
       costPerGram
     };
   }, [
     jobGrams, jobHours, jobMinutes, failureRate, postMinutes, profitMargin,
-    selectedPrinter, selectedFilament, electricityRate, labourRate
+    selectedPrinter, selectedFilament, electricityRate, labourRate, extras
   ]);
 
   return (
@@ -214,6 +221,16 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="font-bold text-primary">Margem de Lucro (%)</Label>
+                  <Input 
+                    type="number" 
+                    value={profitMargin} 
+                    onChange={e => setProfitMargin(Number(e.target.value))}
+                    className="border-primary/50 focus-visible:ring-primary"
+                  />
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -235,14 +252,8 @@ const Index = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="font-bold text-primary">Margem de Lucro (%)</Label>
-                  <Input 
-                    type="number" 
-                    value={profitMargin} 
-                    onChange={e => setProfitMargin(Number(e.target.value))}
-                    className="border-primary/50 focus-visible:ring-primary"
-                  />
+                <div className="pt-2">
+                  <ExtraManager extras={extras} onUpdate={setExtras} currency={currency} />
                 </div>
               </div>
             </CardContent>
