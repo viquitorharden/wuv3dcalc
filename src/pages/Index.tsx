@@ -156,12 +156,16 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground p-4 md:p-8 max-w-[1600px] mx-auto">
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="flex items-center gap-3">
-          <div className="bg-primary p-2 rounded-xl">
-            <Calculator className="h-8 w-8 text-primary-foreground" />
+          <div className="bg-white p-1 rounded-xl shadow-sm border">
+            <img 
+              src="https://i.imgur.com/RQI3mui.png" 
+              alt="WUV Studios Logo" 
+              className="h-10 w-10 object-contain"
+            />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight">3D PRINT CALC</h1>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Calculadora de Custos</p>
+            <h1 className="text-2xl font-black tracking-tight">WUV STUDIOS</h1>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Calculadora 3D</p>
           </div>
         </div>
         
