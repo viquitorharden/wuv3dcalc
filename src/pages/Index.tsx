@@ -8,6 +8,7 @@ import PrinterManager, { Printer } from '@/components/PrinterManager';
 import FilamentManager, { Filament } from '@/components/FilamentManager';
 import ExtraManager, { ExtraItem } from '@/components/ExtraManager';
 import ResultsDisplay from '@/components/ResultsDisplay';
+import MarketplacePrices from '@/components/MarketplacePrices';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { 
   Settings2, 
@@ -280,6 +281,11 @@ const Index = () => {
           <div className="sticky top-8">
             <ResultsDisplay results={results} currency={currency} />
             
+            <MarketplacePrices 
+              targetPricePerUnit={results.suggestedPrice / results.quantity} 
+              currency={currency} 
+            />
+
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
               <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
                 <strong>Nota:</strong> O peso e o tempo de impressão devem ser o <strong>total do lote</strong>. Itens extras e tempo de pós-processamento são considerados <strong>por unidade</strong>.
