@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Plus, Trash2, Layers } from 'lucide-react';
+import { Plus, Trash2, Layers, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 export interface Filament {
   id: string;
@@ -54,7 +55,7 @@ const FilamentManager = ({ filaments, onUpdate, selectedId, onSelect, currency }
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Layers className="h-5 w-5" /> Filamentos
+          <Layers className="h-5 w-5 text-purple-500" /> Filamentos
         </h3>
         <Button variant="outline" size="sm" onClick={() => setIsAdding(!isAdding)}>
           {isAdding ? 'Cancelar' : <><Plus className="h-4 w-4 mr-1" /> Adicionar</>}
@@ -62,7 +63,7 @@ const FilamentManager = ({ filaments, onUpdate, selectedId, onSelect, currency }
       </div>
 
       {isAdding && (
-        <Card className="bg-muted/50">
+        <Card className="bg-muted/50 border-dashed">
           <CardContent className="pt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
@@ -82,7 +83,7 @@ const FilamentManager = ({ filaments, onUpdate, selectedId, onSelect, currency }
                 />
               </div>
               <div>
-                <Label>Preço do Carretel ({currency})</Label>
+                <Label>Preço ({currency})</Label>
                 <Input 
                   type="number" 
                   value={newFilament.price} 
@@ -90,40 +91,59 @@ const FilamentManager = ({ filaments, onUpdate, selectedId, onSelect, currency }
                 />
               </div>
             </div>
-            <Button className="w-full" onClick={handleAdd}>Salvar Filamento</Button>
+            <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={handleAdd}>Salvar Filamento</Button>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-2">
-        {filaments.map(filament => (
-          <div
-            key={filament.id}
-            onClick={() => onSelect(filament.id)}
-            className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${
-              selectedId === filament.id 
-                ? 'border-primary bg-primary/5 ring-1 ring-primary' 
-                : 'hover:bg-muted'
-            }`}
-          >
-            <div>
-              <p className="font-medium">{filament.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {filament.weightGrams}g • {currency}{filament.price} ({currency}{(filament.price / filament.weightGrams).toFixed(3)}/g)
-              </p>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={(e) => handleDelete(filament.id, e)}
+      <div className="grid gap-3">
+        {filaments.map(filament => {
+          const isSelected = selectedId === filament.id;
+          return (
+            <div
+              key={filament.id}
+              onClick={() => onSelect(filament.id)}
+              className={cn(
+                "p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between group relative overflow-hidden",
+                isSelected 
+                  ? "border-purple-500 bg-purple-50 dark:bg-purple-950/40 ring-4 ring-purple-500/10 shadow-md" 
+                  : "border-border bg-card hover:border-purple-200 hover:bg-muted/30"
+              )}
             >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
+              {isSelected && (
+                <div className="absolute top-0 right-0 p-1">
+                  <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "p-2 rounded-lg",
+                  isSelected ? "bg-purple-500 text-white" : "bg-muted text-muted-foreground group-hover:bg-purple-100 group-hover:text-purple-600"
+                )}>
+                  <Layers className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className={cn("font-bold", isSelected ? "text-purple-700 dark:text-purple-300" : "text-foreground")}>
+                    {filament.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {filament.weightGrams}g • {currency}{filament.price}
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => handleDelete(filament.id, e)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          );
+        })}
         {filaments.length === 0 && !isAdding && (
-          <p className="text-sm text-center text-muted-foreground py-4">Nenhum filamento cadastrado.</p>
+          <p className="text-sm text-center text-muted-foreground py-4 italic">Nenhum filamento cadastrado.</p>
         )}
       </div>
     </div>
