@@ -153,7 +153,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="min-h-screen bg-background text-foreground p-4 md:p-8 max-w-[1600px] mx-auto">
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="flex items-center gap-3">
           <div className="bg-primary p-2 rounded-xl">
@@ -183,8 +183,9 @@ const Index = () => {
         </TabsList>
 
         <TabsContent value="calculator">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-7 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Coluna 1: Configurações e Dados de Entrada */}
+            <div className="space-y-6">
               <Collapsible
                 open={isSettingsOpen}
                 onOpenChange={setIsSettingsOpen}
@@ -194,13 +195,13 @@ const Index = () => {
                   <Button variant="ghost" className="w-full flex justify-between items-center p-6 h-auto hover:bg-muted/50">
                     <div className="flex items-center gap-2">
                       <Settings2 className="h-5 w-5 text-primary" />
-                      <span className="font-bold text-lg">Configurações e Biblioteca</span>
+                      <span className="font-bold text-lg">Biblioteca</span>
                     </div>
                     {isSettingsOpen ? <ChevronUp /> : <ChevronDown />}
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="p-6 pt-0 border-t">
-                  <div className="grid md:grid-cols-2 gap-8 mt-6">
+                  <div className="space-y-8 mt-6">
                     <PrinterManager 
                       printers={printers} 
                       onUpdate={setPrinters} 
@@ -216,7 +217,7 @@ const Index = () => {
                       currency={currency}
                     />
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4 mt-8 pt-6 border-t">
+                  <div className="grid grid-cols-1 gap-4 mt-8 pt-6 border-t">
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2"><Zap className="h-4 w-4" /> Custo Energia ({currency}/kWh)</Label>
                       <Input 
@@ -244,68 +245,66 @@ const Index = () => {
                     <TrendingUp className="h-5 w-5 text-primary" /> Dados da Impressão
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="font-bold">Peso Total do Lote (g)</Label>
-                        <Input 
-                          type="number" 
-                          value={jobGrams} 
-                          onChange={e => setJobGrams(Number(e.target.value))}
-                          className="text-lg"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                          <Layers className="h-4 w-4" /> Peças na Mesa
-                        </Label>
-                        <Input 
-                          type="number" 
-                          min="1"
-                          value={quantity} 
-                          onChange={e => setQuantity(Number(e.target.value))}
-                          className="text-lg border-blue-200 focus-visible:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-                    
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="font-bold flex items-center gap-2"><Clock className="h-4 w-4" /> Tempo Total de Impressão</Label>
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <Input 
-                            type="number" 
-                            value={jobHours} 
-                            onChange={e => setJobHours(Number(e.target.value))}
-                            placeholder="Horas"
-                          />
-                          <span className="text-[10px] text-muted-foreground uppercase font-bold mt-1 block">Horas</span>
-                        </div>
-                        <div className="flex-1">
-                          <Input 
-                            type="number" 
-                            value={jobMinutes} 
-                            onChange={e => setJobMinutes(Number(e.target.value))}
-                            placeholder="Minutos"
-                          />
-                          <span className="text-[10px] text-muted-foreground uppercase font-bold mt-1 block">Minutos</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="font-bold text-primary">Margem de Lucro (%)</Label>
+                      <Label className="font-bold">Peso Lote (g)</Label>
                       <Input 
                         type="number" 
-                        value={profitMargin} 
-                        onChange={e => setProfitMargin(Number(e.target.value))}
-                        className="border-primary/50 focus-visible:ring-primary"
+                        value={jobGrams} 
+                        onChange={e => setJobGrams(Number(e.target.value))}
+                        className="text-lg"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                        <Layers className="h-4 w-4" /> Peças
+                      </Label>
+                      <Input 
+                        type="number" 
+                        min="1"
+                        value={quantity} 
+                        onChange={e => setQuantity(Number(e.target.value))}
+                        className="text-lg border-blue-200 focus-visible:ring-blue-500"
                       />
                     </div>
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="font-bold flex items-center gap-2"><Clock className="h-4 w-4" /> Tempo Total</Label>
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Input 
+                          type="number" 
+                          value={jobHours} 
+                          onChange={e => setJobHours(Number(e.target.value))}
+                          placeholder="Horas"
+                        />
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold mt-1 block">Horas</span>
+                      </div>
+                      <div className="flex-1">
+                        <Input 
+                          type="number" 
+                          value={jobMinutes} 
+                          onChange={e => setJobMinutes(Number(e.target.value))}
+                          placeholder="Minutos"
+                        />
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold mt-1 block">Minutos</span>
+                      </div>
+                    </div>
+                  </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="font-bold text-primary">Margem de Lucro (%)</Label>
+                    <Input 
+                      type="number" 
+                      value={profitMargin} 
+                      onChange={e => setProfitMargin(Number(e.target.value))}
+                      className="border-primary/50 focus-visible:ring-primary"
+                    />
+                  </div>
+
+                  <div className="space-y-4 pt-4 border-t">
                     <div className="space-y-2">
                       <Label className="font-bold flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Taxa de Falha (%)</Label>
                       <Input 
@@ -322,7 +321,6 @@ const Index = () => {
                         value={postMinutes} 
                         onChange={e => setPostMinutes(Number(e.target.value))}
                       />
-                      <p className="text-[10px] text-muted-foreground italic">Tempo gasto por unidade</p>
                     </div>
 
                     <div className="pt-2">
@@ -333,23 +331,24 @@ const Index = () => {
               </Card>
             </div>
 
-            <div className="lg:col-span-5">
-              <div className="sticky top-8">
-                <ResultsDisplay results={results} currency={currency} />
-                
-                <SavePrintDialog onSave={handleSavePrint} />
-
-                <MarketplacePrices 
-                  targetPricePerUnit={results.suggestedPrice / results.quantity} 
-                  currency={currency} 
-                />
-
-                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
-                  <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                    <strong>Nota:</strong> O peso e o tempo de impressão devem ser o <strong>total do lote</strong>. Itens extras e tempo de pós-processamento são considerados <strong>por unidade</strong>.
-                  </p>
-                </div>
+            {/* Coluna 2: Resumo de Custos */}
+            <div className="lg:sticky lg:top-8 space-y-6">
+              <ResultsDisplay results={results} currency={currency} />
+              <SavePrintDialog onSave={handleSavePrint} />
+              
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
+                <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                  <strong>Nota:</strong> O peso e o tempo de impressão devem ser o <strong>total do lote</strong>. Itens extras e tempo de pós-processamento são considerados <strong>por unidade</strong>.
+                </p>
               </div>
+            </div>
+
+            {/* Coluna 3: Preços de Marketplace */}
+            <div className="lg:sticky lg:top-8">
+              <MarketplacePrices 
+                targetPricePerUnit={results.suggestedPrice / results.quantity} 
+                currency={currency} 
+              />
             </div>
           </div>
         </TabsContent>
