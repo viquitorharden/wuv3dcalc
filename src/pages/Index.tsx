@@ -56,34 +56,37 @@ const Index = () => {
 
   const results = useMemo(() => {
     const totalHours = jobHours + (jobMinutes / 60);
+    const safeQuantity = quantity > 0 ? quantity : 1;
     
-    // 1. Filament Cost
+    // 1. Filament Cost (Total for the batch)
     const costPerGram = selectedFilament 
       ? selectedFilament.price / selectedFilament.weightGrams 
-      : 0.09; // Default fallback
+      : 0.09; 
     const filamentCost = jobGrams * costPerGram;
 
-    // 2. Electricity Cost
+    // 2. Electricity Cost (Total for the batch)
     const watts = selectedPrinter?.powerWatts || 150;
     const electricityCost = (watts / 1000) * totalHours * electricityRate;
 
-    // 3. Printer Wear
+    // 3. Printer Wear (Total for the batch)
     const wearPerHour = selectedPrinter 
       ? (selectedPrinter.price / selectedPrinter.lifespanHours) + selectedPrinter.maintenancePerHour
-      : 0.80; // Default fallback
+      : 0.80; 
     const printerWear = wearPerHour * totalHours;
 
-    // 4. Failure Surcharge
-    const baseCost = filamentCost + electricityCost + printerWear;
-    const failureSurcharge = (failureRate / 100) * baseCost;
+    // 4. Failure Surcharge (Based on production costs)
+    const baseProductionCost = filamentCost + electricityCost + printerWear;
+    const failureSurcharge = (failureRate / 100) * baseProductionCost;
 
-    // 5. Post-processing
-    const postProcessingCost = (postMinutes / 60) * labourRate;
+    // 5. Post-processing (Per piece * quantity)
+    const totalPostMinutes = postMinutes * safeQuantity;
+    const postProcessingCost = (totalPostMinutes / 60) * labourRate;
 
-    // 6. Extras
-    const extrasCost = extras.reduce((sum, item) => sum + item.price, 0);
+    // 6. Extras (Per piece * quantity)
+    const singleExtraCost = extras.reduce((sum, item) => sum + item.price, 0);
+    const extrasCost = singleExtraCost * safeQuantity;
 
-    const subtotal = baseCost + failureSurcharge + postProcessingCost + extrasCost;
+    const subtotal = baseProductionCost + failureSurcharge + postProcessingCost + extrasCost;
     const suggestedPrice = subtotal * (1 + profitMargin / 100);
 
     return {
@@ -96,7 +99,7 @@ const Index = () => {
       subtotal,
       suggestedPrice,
       costPerGram,
-      quantity: quantity > 0 ? quantity : 1
+      quantity: safeQuantity
     };
   }, [
     jobGrams, jobHours, jobMinutes, failureRate, postMinutes, profitMargin,
@@ -124,10 +127,7 @@ const Index = () => {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Inputs & Settings */}
         <div className="lg:col-span-7 space-y-6">
-          
-          {/* Settings Collapsible */}
           <Collapsible
             open={isSettingsOpen}
             onOpenChange={setIsSettingsOpen}
@@ -181,7 +181,6 @@ const Index = () => {
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Job Inputs */}
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -260,12 +259,13 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="font-bold">Pós-processamento (min)</Label>
+                  <Label className="font-bold">Pós-processamento (min/peça)</Label>
                   <Input 
                     type="number" 
                     value={postMinutes} 
                     onChange={e => setPostMinutes(Number(e.target.value))}
                   />
+                  <p className="text-[10px] text-muted-foreground italic">Tempo gasto por unidade</p>
                 </div>
 
                 <div className="pt-2">
@@ -276,14 +276,13 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Right Column: Results */}
         <div className="lg:col-span-5">
           <div className="sticky top-8">
             <ResultsDisplay results={results} currency={currency} />
             
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
               <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                <strong>Dica:</strong> Insira o peso e tempo <strong>totais</strong> informados pelo seu fatiador. A calculadora dividirá os custos automaticamente pela quantidade de peças na mesa.
+                <strong>Nota:</strong> Itens extras e tempo de pós-processamento são considerados <strong>por unidade</strong> e multiplicados pela quantidade de peças na mesa.
               </p>
             </div>
           </div>
