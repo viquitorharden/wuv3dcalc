@@ -167,7 +167,7 @@ const Index = () => {
                     type="number" 
                     step="0.01" 
                     value={electricityRate} 
-                    onChange={setElectricityRate(Number(e.target.value))}
+                    onChange={e => setElectricityRate(Number(e.target.value))}
                   />
                 </div>
                 <div className="space-y-2">
