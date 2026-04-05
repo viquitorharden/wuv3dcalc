@@ -10,6 +10,7 @@ import ExtraManager, { ExtraItem } from '@/components/ExtraManager';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import MarketplacePrices from '@/components/MarketplacePrices';
 import SavePrintDialog from '@/components/SavePrintDialog';
+import BudgetGenerator from '@/components/BudgetGenerator';
 import SavedPrintsManager, { SavedPrint } from '@/components/SavedPrintsManager';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { 
@@ -116,7 +117,7 @@ const Index = () => {
     // Marketplace calculation logic (synced with MarketplacePrices component)
     const platforms = [
       { name: 'TikTok Shop', commission: 0.06, fixedFee: 4 },
-      { name: 'Shopee', commission: 0.14, fixedFee: 4 }, // Simplified for history save
+      { name: 'Shopee', commission: 0.14, fixedFee: 4 },
       { name: 'Amazon (Indiv.)', commission: 0.13, fixedFee: 2 },
       { name: 'ML Clássico', commission: 0.12, fixedFee: 6.75 },
       { name: 'ML Premium', commission: 0.16, fixedFee: 6.75 }
@@ -340,7 +341,10 @@ const Index = () => {
             {/* Coluna 2: Resumo de Custos */}
             <div className="lg:sticky lg:top-8 space-y-6">
               <ResultsDisplay results={results} currency={currency} />
-              <SavePrintDialog onSave={handleSavePrint} />
+              <div className="space-y-2">
+                <SavePrintDialog onSave={handleSavePrint} />
+                <BudgetGenerator results={results} currency={currency} />
+              </div>
               
               <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
                 <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
