@@ -49,26 +49,29 @@ const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   // Job Inputs
-  const [jobGrams, setJobGrams] = useState(50);
-  const [jobHours, setJobHours] = useState(2);
-  const [jobMinutes, setJobMinutes] = useState(30);
-  const [quantity, setQuantity] = useState(1);
-  const [failureRate, setFailureRate] = useState(10);
-  const [postMinutes, setPostMinutes] = useState(15);
-  const [profitMargin, setProfitMargin] = useState(50);
+  const [jobGrams, setJobGrams] = useState<number | "">(50);
+  const [jobHours, setJobHours] = useState<number | "">(2);
+  const [jobMinutes, setJobMinutes] = useState<number | "">(30);
+  const [quantity, setQuantity] = useState<number | "">(1);
+  const [failureRate, setFailureRate] = useState<number | "">(10);
+  const [postMinutes, setPostMinutes] = useState<number | "">(15);
+  const [profitMargin, setProfitMargin] = useState<number | "">(50);
 
   // Derived Data
   const selectedPrinter = printers.find(p => p.id === selectedPrinterId);
   const selectedFilament = filaments.find(f => f.id === selectedFilamentId);
 
   const results = useMemo(() => {
-    const totalHours = jobHours + (jobMinutes / 60);
-    const safeQuantity = quantity > 0 ? quantity : 1;
+    const h = Number(jobHours) || 0;
+    const m = Number(jobMinutes) || 0;
+    const totalHours = h + (m / 60);
+    const safeQuantity = Number(quantity) > 0 ? Number(quantity) : 1;
+    const grams = Number(jobGrams) || 0;
     
     const costPerGram = selectedFilament 
       ? selectedFilament.price / selectedFilament.weightGrams 
       : 0.09; 
-    const filamentCost = jobGrams * costPerGram;
+    const filamentCost = grams * costPerGram;
 
     const watts = selectedPrinter?.powerWatts || 150;
     const electricityCost = (watts / 1000) * totalHours * electricityRate;
@@ -79,16 +82,16 @@ const Index = () => {
     const printerWear = wearPerHour * totalHours;
 
     const baseProductionCost = filamentCost + electricityCost + printerWear;
-    const failureSurcharge = (failureRate / 100) * baseProductionCost;
+    const failureSurcharge = ((Number(failureRate) || 0) / 100) * baseProductionCost;
 
-    const totalPostMinutes = postMinutes * safeQuantity;
+    const totalPostMinutes = (Number(postMinutes) || 0) * safeQuantity;
     const postProcessingCost = (totalPostMinutes / 60) * labourRate;
 
     const singleExtraCost = extras.reduce((sum, item) => sum + item.price, 0);
     const extrasCost = singleExtraCost * safeQuantity;
 
     const subtotal = baseProductionCost + failureSurcharge + postProcessingCost + extrasCost;
-    const suggestedPrice = subtotal * (1 + profitMargin / 100);
+    const suggestedPrice = subtotal * (1 + (Number(profitMargin) || 0) / 100);
 
     return {
       filamentCost,
@@ -112,12 +115,11 @@ const Index = () => {
     
     // Marketplace calculation logic (synced with MarketplacePrices component)
     const platforms = [
-      { name: 'TikTok Shop', commission: 0.06, fixedFee: 5.06 },
-      { name: 'Shopee (CPF)', commission: 0.14, fixedFee: 7 },
-      { name: 'Shopee (CNPJ)', commission: 0.14, fixedFee: 4 },
-      { name: 'Amazon (Indiv.)', commission: 0.15, fixedFee: 2 },
-      { name: 'ML Clássico', commission: 0.14, fixedFee: 6.75 },
-      { name: 'ML Premium', commission: 0.19, fixedFee: 6.75 }
+      { name: 'TikTok Shop', commission: 0.06, fixedFee: 4 },
+      { name: 'Shopee', commission: 0.14, fixedFee: 4 }, // Simplified for history save
+      { name: 'Amazon (Indiv.)', commission: 0.13, fixedFee: 2 },
+      { name: 'ML Clássico', commission: 0.12, fixedFee: 6.75 },
+      { name: 'ML Premium', commission: 0.16, fixedFee: 6.75 }
     ];
 
     const marketplacePrices = platforms.map(p => ({
@@ -131,11 +133,11 @@ const Index = () => {
       date: new Date().toISOString(),
       currency,
       inputs: {
-        jobGrams,
-        jobHours,
-        jobMinutes,
-        quantity,
-        profitMargin
+        jobGrams: Number(jobGrams) || 0,
+        jobHours: Number(jobHours) || 0,
+        jobMinutes: Number(jobMinutes) || 0,
+        quantity: Number(quantity) || 1,
+        profitMargin: Number(profitMargin) || 0
       },
       results: {
         subtotal: results.subtotal,
@@ -228,7 +230,7 @@ const Index = () => {
                         type="number" 
                         step="0.01" 
                         value={electricityRate} 
-                        onChange={e => setElectricityRate(Number(e.target.value))}
+                        onChange={e => setElectricityRate(e.target.value === '' ? 0 : Number(e.target.value))}
                       />
                     </div>
                     <div className="space-y-2">
@@ -236,7 +238,7 @@ const Index = () => {
                       <Input 
                         type="number" 
                         value={labourRate} 
-                        onChange={e => setLabourRate(Number(e.target.value))}
+                        onChange={e => setLabourRate(e.target.value === '' ? 0 : Number(e.target.value))}
                       />
                     </div>
                   </div>
@@ -256,7 +258,7 @@ const Index = () => {
                       <Input 
                         type="number" 
                         value={jobGrams} 
-                        onChange={e => setJobGrams(Number(e.target.value))}
+                        onChange={e => setJobGrams(e.target.value === '' ? '' : Number(e.target.value))}
                         className="text-lg"
                       />
                     </div>
@@ -268,7 +270,7 @@ const Index = () => {
                         type="number" 
                         min="1"
                         value={quantity} 
-                        onChange={e => setQuantity(Number(e.target.value))}
+                        onChange={e => setQuantity(e.target.value === '' ? '' : Number(e.target.value))}
                         className="text-lg border-blue-200 focus-visible:ring-blue-500"
                       />
                     </div>
@@ -281,7 +283,7 @@ const Index = () => {
                         <Input 
                           type="number" 
                           value={jobHours} 
-                          onChange={e => setJobHours(Number(e.target.value))}
+                          onChange={e => setJobHours(e.target.value === '' ? '' : Number(e.target.value))}
                           placeholder="Horas"
                         />
                         <span className="text-[10px] text-muted-foreground uppercase font-bold mt-1 block">Horas</span>
@@ -290,7 +292,7 @@ const Index = () => {
                         <Input 
                           type="number" 
                           value={jobMinutes} 
-                          onChange={e => setJobMinutes(Number(e.target.value))}
+                          onChange={e => setJobMinutes(e.target.value === '' ? '' : Number(e.target.value))}
                           placeholder="Minutos"
                         />
                         <span className="text-[10px] text-muted-foreground uppercase font-bold mt-1 block">Minutos</span>
@@ -303,7 +305,7 @@ const Index = () => {
                     <Input 
                       type="number" 
                       value={profitMargin} 
-                      onChange={e => setProfitMargin(Number(e.target.value))}
+                      onChange={e => setProfitMargin(e.target.value === '' ? '' : Number(e.target.value))}
                       className="border-primary/50 focus-visible:ring-primary"
                     />
                   </div>
@@ -314,7 +316,7 @@ const Index = () => {
                       <Input 
                         type="number" 
                         value={failureRate} 
-                        onChange={e => setFailureRate(Number(e.target.value))}
+                        onChange={e => setFailureRate(e.target.value === '' ? '' : Number(e.target.value))}
                       />
                     </div>
 
@@ -323,7 +325,7 @@ const Index = () => {
                       <Input 
                         type="number" 
                         value={postMinutes} 
-                        onChange={e => setPostMinutes(Number(e.target.value))}
+                        onChange={e => setPostMinutes(e.target.value === '' ? '' : Number(e.target.value))}
                       />
                     </div>
 
