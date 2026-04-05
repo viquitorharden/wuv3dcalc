@@ -35,7 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 
 const Index = () => {
-  // Persisted State
+  // Persisted Settings
   const [currency, setCurrency] = useLocalStorage('calc_currency', 'R$');
   const [printers, setPrinters] = useLocalStorage<Printer[]>('calc_printers', []);
   const [filaments, setFilaments] = useLocalStorage<Filament[]>('calc_filaments', []);
@@ -46,18 +46,18 @@ const Index = () => {
   const [electricityRate, setElectricityRate] = useLocalStorage('calc_elec_rate', 0.85);
   const [labourRate, setLabourRate] = useLocalStorage('calc_labour_rate', 30);
   
+  // Persisted Job Inputs
+  const [jobGrams, setJobGrams] = useLocalStorage<number | "">('calc_job_grams', 50);
+  const [jobHours, setJobHours] = useLocalStorage<number | "">('calc_job_hours', 2);
+  const [jobMinutes, setJobMinutes] = useLocalStorage<number | "">('calc_job_minutes', 30);
+  const [quantity, setQuantity] = useLocalStorage<number | "">('calc_job_quantity', 1);
+  const [failureRate, setFailureRate] = useLocalStorage<number | "">('calc_job_failure', 10);
+  const [postMinutes, setPostMinutes] = useLocalStorage<number | "">('calc_job_post', 15);
+  const [profitMargin, setProfitMargin] = useLocalStorage<number | "">('calc_job_margin', 50);
+
   // UI State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
-  // Job Inputs
-  const [jobGrams, setJobGrams] = useState<number | "">(50);
-  const [jobHours, setJobHours] = useState<number | "">(2);
-  const [jobMinutes, setJobMinutes] = useState<number | "">(30);
-  const [quantity, setQuantity] = useState<number | "">(1);
-  const [failureRate, setFailureRate] = useState<number | "">(10);
-  const [postMinutes, setPostMinutes] = useState<number | "">(15);
-  const [profitMargin, setProfitMargin] = useState<number | "">(50);
-
   // Derived Data
   const selectedPrinter = printers.find(p => p.id === selectedPrinterId);
   const selectedFilament = filaments.find(f => f.id === selectedFilamentId);
