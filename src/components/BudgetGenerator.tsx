@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileText } from "lucide-react";
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 interface BudgetGeneratorProps {
@@ -32,7 +32,7 @@ const BudgetGenerator = ({ results, currency }: BudgetGeneratorProps) => {
   const format = (val: number) => val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const generatePDF = () => {
-    const doc = jsPDF();
+    const doc = new jsPDF();
     const date = new Date().toLocaleDateString('pt-BR');
     
     // Header
@@ -63,7 +63,7 @@ const BudgetGenerator = ({ results, currency }: BudgetGeneratorProps) => {
         ]
       ],
       theme: 'striped',
-      headStyles: { fillStyle: 'DF', fillColor: [41, 128, 185], textColor: 255 },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
     });
 
     const finalY = (doc as any).lastAutoTable.finalY + 10;
