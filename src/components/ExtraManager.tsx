@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
 export interface ExtraItem {
   id: string;
   name: string;
   price: number;
+  enabled: boolean;
+  isDefault?: boolean;
 }
 
 interface ExtraManagerProps {
@@ -27,12 +30,26 @@ const ExtraManager = ({ extras, onUpdate, currency }: ExtraManagerProps) => {
     price: 0
   });
 
+  const handleToggle = (id: string) => {
+    onUpdate(extras.map(item => 
+      item.id === id ? { ...item, enabled: !item.enabled } : item
+    ));
+  };
+
+  const handlePriceChange = (id: string, newPrice: number) => {
+    onUpdate(extras.map(item => 
+      item.id === id ? { ...item, price: newPrice } : item
+    ));
+  };
+
   const handleAdd = () => {
     if (!newItem.name) return;
     const item: ExtraItem = {
       id: crypto.randomUUID(),
       name: newItem.name,
       price: Number(newItem.price) || 0,
+      enabled: true,
+      isDefault: false
     };
     onUpdate([...extras, item]);
     setNewItem({ name: '', price: 0 });
@@ -50,7 +67,7 @@ const ExtraManager = ({ extras, onUpdate, currency }: ExtraManagerProps) => {
           <Package className="h-5 w-5 text-orange-500" /> Itens Extras
         </h3>
         <Button variant="outline" size="sm" onClick={() => setIsAdding(!isAdding)}>
-          {isAdding ? 'Cancelar' : <><Plus className="h-4 w-4 mr-1" /> Adicionar</>}
+          {isAdding ? 'Cancelar' : <><Plus className="h-4 w-4 mr-1" /> Novo</>}
         </Button>
       </div>
 
@@ -59,23 +76,25 @@ const ExtraManager = ({ extras, onUpdate, currency }: ExtraManagerProps) => {
           <CardContent className="pt-4 space-y-3">
             <div className="grid grid-cols-1 gap-3">
               <div>
-                <Label>Nome do Item</Label>
+                <Label className="text-xs">Nome do Item</Label>
                 <Input 
                   value={newItem.name} 
                   onChange={e => setNewItem({...newItem, name: e.target.value})}
-                  placeholder="Ex: Embalagem Kraft"
+                  placeholder="Ex: Cartão de Visita"
+                  className="h-8 text-sm"
                 />
               </div>
               <div>
-                <Label>Preço ({currency})</Label>
+                <Label className="text-xs">Preço ({currency})</Label>
                 <Input 
                   type="number" 
                   value={newItem.price} 
                   onChange={e => setNewItem({...newItem, price: Number(e.target.value)})}
+                  className="h-8 text-sm"
                 />
               </div>
             </div>
-            <Button className="w-full bg-orange-600 hover:bg-orange-700" onClick={handleAdd}>Adicionar Extra</Button>
+            <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-700" onClick={handleAdd}>Adicionar</Button>
           </CardContent>
         </Card>
       )}
@@ -84,32 +103,43 @@ const ExtraManager = ({ extras, onUpdate, currency }: ExtraManagerProps) => {
         {extras.map(item => (
           <div
             key={item.id}
-            className="p-3 rounded-xl border bg-card flex items-center justify-between group"
+            className={cn(
+              "p-2 rounded-xl border transition-all flex items-center justify-between group",
+              item.enabled ? "bg-orange-50/50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-900" : "bg-card opacity-60"
+            )}
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
-                <Package className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="font-bold text-sm">{item.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {currency} {item.price.toFixed(2)}
-                </p>
+            <div className="flex items-center gap-3 flex-1">
+              <Checkbox 
+                checked={item.enabled} 
+                onCheckedChange={() => handleToggle(item.id)}
+                className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-xs truncate">{item.name}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-[10px] text-muted-foreground">{currency}</span>
+                  <input 
+                    type="number"
+                    value={item.price}
+                    onChange={(e) => handlePriceChange(item.id, Number(e.target.value))}
+                    className="bg-transparent border-none p-0 text-[10px] font-bold w-16 focus:ring-0 focus:outline-none"
+                    step="0.01"
+                  />
+                </div>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => handleDelete(item.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {!item.isDefault && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleDelete(item.id)}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
           </div>
         ))}
-        {extras.length === 0 && !isAdding && (
-          <p className="text-sm text-center text-muted-foreground py-4 italic">Nenhum item extra adicionado.</p>
-        )}
       </div>
     </div>
   );

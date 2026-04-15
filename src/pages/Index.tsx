@@ -34,12 +34,19 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 
+const DEFAULT_EXTRAS: ExtraItem[] = [
+  { id: 'def-emb', name: 'Embalagem', price: 1.00, enabled: false, isDefault: true },
+  { id: 'def-cha', name: 'Chaveiro', price: 0.30, enabled: false, isDefault: true },
+  { id: 'def-ade', name: 'Adesivo', price: 0.05, enabled: false, isDefault: true },
+  { id: 'def-saq', name: 'Saquinho Holográfico', price: 0.50, enabled: false, isDefault: true },
+];
+
 const Index = () => {
   // Persisted Settings
   const [currency, setCurrency] = useLocalStorage('calc_currency', 'R$');
   const [printers, setPrinters] = useLocalStorage<Printer[]>('calc_printers', []);
   const [filaments, setFilaments] = useLocalStorage<Filament[]>('calc_filaments', []);
-  const [extras, setExtras] = useLocalStorage<ExtraItem[]>('calc_extras', []);
+  const [extras, setExtras] = useLocalStorage<ExtraItem[]>('calc_extras', DEFAULT_EXTRAS);
   const [savedPrints, setSavedPrints] = useLocalStorage<SavedPrint[]>('calc_saved_prints', []);
   const [selectedPrinterId, setSelectedPrinterId] = useLocalStorage('calc_selected_printer', '');
   const [selectedFilamentId, setSelectedFilamentId] = useLocalStorage('calc_selected_filament', '');
@@ -88,7 +95,9 @@ const Index = () => {
     const totalPostMinutes = (Number(postMinutes) || 0) * safeQuantity;
     const postProcessingCost = (totalPostMinutes / 60) * labourRate;
 
-    const singleExtraCost = extras.reduce((sum, item) => sum + item.price, 0);
+    const singleExtraCost = extras
+      .filter(e => e.enabled)
+      .reduce((sum, item) => sum + item.price, 0);
     const extrasCost = singleExtraCost * safeQuantity;
 
     const subtotal = baseProductionCost + failureSurcharge + postProcessingCost + extrasCost;
