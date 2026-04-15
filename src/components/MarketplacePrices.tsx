@@ -100,42 +100,42 @@ const MarketplacePrices = ({ targetPricePerUnit, currency }: MarketplacePricesPr
 
   return (
     <Card className="mt-6 border-2 border-primary/10 shadow-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-bold flex items-center gap-2">
-          <ShoppingCart className="h-5 w-5 text-primary" /> Preço Mínimo por Plataforma
+      <CardHeader className="pb-2 pt-4 px-4">
+        <CardTitle className="text-base font-bold flex items-center gap-2">
+          <ShoppingCart className="h-4 w-4 text-primary" /> Preço Mínimo Marketplace
         </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Valor de venda necessário para manter seu lucro por unidade ({currency} {format(targetPricePerUnit)})
+        <p className="text-[10px] text-muted-foreground leading-tight">
+          Valor necessário para manter lucro de {currency} {format(targetPricePerUnit)}/un.
         </p>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <CardContent className="p-3 pt-0">
+        <div className="grid grid-cols-1 gap-2">
           {platforms.map((p) => {
             const finalPrice = p.calculate(targetPricePerUnit);
             return (
               <div 
                 key={p.name} 
-                className={`p-3 rounded-xl border-l-4 bg-muted/30 flex justify-between items-center ${p.color}`}
+                className={`p-2 rounded-lg border-l-4 bg-muted/30 flex justify-between items-center ${p.color}`}
               >
-                <div>
+                <div className="flex flex-col">
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-bold uppercase tracking-tight">{p.name}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-tight">{p.name}</span>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
                           <Info className="h-3 w-3 text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p className="text-xs">{p.getDescription(finalPrice)}</p>
+                          <p className="text-[10px]">{p.getDescription(finalPrice)}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <p className="text-lg font-black text-foreground">
+                  <p className="text-sm font-black text-foreground">
                     {currency} {format(finalPrice)}
                   </p>
                 </div>
-                <Badge variant="outline" className="text-[10px] opacity-70">
+                <Badge variant="outline" className="text-[9px] h-4 px-1 opacity-60">
                   Info
                 </Badge>
               </div>
