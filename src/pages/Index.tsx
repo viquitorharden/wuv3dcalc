@@ -12,7 +12,6 @@ import MarketplacePrices from '@/components/MarketplacePrices';
 import SavePrintDialog from '@/components/SavePrintDialog';
 import BudgetGenerator from '@/components/BudgetGenerator';
 import SavedPrintsManager, { SavedPrint } from '@/components/SavedPrintsManager';
-import { MadeWithDyad } from '@/components/made-with-dyad';
 import { 
   Settings2, 
   Calculator, 
@@ -384,7 +383,6 @@ const Index = () => {
       </Tabs>
 
       <footer className="mt-12 pt-8 border-t">
-        <MadeWithDyad />
       </footer>
     </div>
   );
