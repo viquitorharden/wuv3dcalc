@@ -9,6 +9,7 @@ import FilamentManager, { Filament } from '@/components/FilamentManager';
 import ExtraManager, { ExtraItem } from '@/components/ExtraManager';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import MarketplacePrices from '@/components/MarketplacePrices';
+import ProfitSimulator from '@/components/ProfitSimulator';
 import SavePrintDialog from '@/components/SavePrintDialog';
 import BudgetGenerator from '@/components/BudgetGenerator';
 import SavedPrintsManager, { SavedPrint } from '@/components/SavedPrintsManager';
@@ -361,10 +362,14 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Coluna 3: Preços de Marketplace */}
-            <div className="lg:sticky lg:top-8">
+            {/* Coluna 3: Preços de Marketplace e Simulador */}
+            <div className="lg:sticky lg:top-8 space-y-6">
               <MarketplacePrices 
                 targetPricePerUnit={results.suggestedPrice / results.quantity} 
+                currency={currency} 
+              />
+              <ProfitSimulator 
+                productionCostPerUnit={results.subtotal / results.quantity} 
                 currency={currency} 
               />
             </div>
