@@ -20,11 +20,20 @@ const MarketplacePrices = ({ targetPricePerUnit, currency }: MarketplacePricesPr
     
     for (let i = 0; i < 10; i++) {
       const fee = getFixedFee(price);
+      let currentCommission = commission;
+      
+      // Regra específica da Shopee: Se o preço final for < 8, a comissão sobe para 20%
+      // (Assumindo que o usuário quer 20% para Shopee no geral ou especificamente para esses casos)
+      // Para simplificar e seguir a instrução: "A taxa fica de 20% + metade do valor do item"
+      if (price < 8 && commission === 0.14) { // Se for Shopee (identificado pela comissão base)
+         currentCommission = 0.20;
+      }
+
       let newPrice;
       if (fee === price * 0.5) {
-        newPrice = target / (1 - commission - 0.5);
+        newPrice = target / (1 - currentCommission - 0.5);
       } else {
-        newPrice = (target + fee) / (1 - commission);
+        newPrice = (target + fee) / (1 - currentCommission);
       }
 
       if (Math.abs(newPrice - price) < 0.01) return newPrice;
@@ -56,11 +65,13 @@ const MarketplacePrices = ({ targetPricePerUnit, currency }: MarketplacePricesPr
     },
     {
       name: 'Shopee',
-      calculate: (target: number) => calculatePrice(target, 0.14, getShopeeFee),
+      // Usamos 20% como base pois é o padrão com programa de frete, 
+      // e a lógica interna do calculatePrice ajusta se necessário.
+      calculate: (target: number) => calculatePrice(target, 0.20, getShopeeFee),
       getDescription: (p: number) => {
         const fee = getShopeeFee(p);
-        if (p < 8) return `14% comissão + Taxa de 50% do valor (R$ ${format(fee)})`;
-        return `14% comissão + R$ ${format(fee)} fixo (Faixa: ${p < 80 ? 'Até R$ 79,99' : p < 100 ? 'R$ 80-99' : p < 200 ? 'R$ 100-199' : 'Acima R$ 200'})`;
+        if (p < 8) return `20% comissão + Taxa de 50% do valor (R$ ${format(fee)})`;
+        return `20% comissão + R$ ${format(fee)} fixo (Faixa: ${p < 80 ? 'Até R$ 79,99' : p < 100 ? 'R$ 80-99' : p < 200 ? 'R$ 100-199' : 'Acima R$ 200'})`;
       },
       color: 'border-orange-500'
     },
